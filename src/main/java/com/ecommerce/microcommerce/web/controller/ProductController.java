@@ -32,18 +32,13 @@ public class ProductController {
     @RequestMapping(value = "/Produits", method = RequestMethod.GET)
     public MappingJacksonValue listeProduits() {
         Iterable<Product> produits = productDao.findAll();
-        SimpleBeanPropertyFilter monFiltre = SimpleBeanPropertyFilter.serializeAllExcept("prixAchat");
-        FilterProvider listDeNosFiltres = new SimpleFilterProvider().addFilter("monFiltreDynamique", monFiltre);
+        SimpleBeanPropertyFilter prixAchatFiltre = SimpleBeanPropertyFilter.serializeAllExcept("prixAchat");
+        FilterProvider listDeNosFiltres = new SimpleFilterProvider().addFilter("filtreDynamique", prixAchatFiltre);
         MappingJacksonValue produitsFiltres = new MappingJacksonValue(produits);
         produitsFiltres.setFilters(listDeNosFiltres);
         return produitsFiltres;
     }
 
-    @RequestMapping(value = "/ProduitsTrier", method = RequestMethod.GET)
-    public List<Product> trierProduitsParOrdreAlphabetique() {
-        List <Product> produits = productDao.findAllByOrderByNom();
-        return produits;
-    }
 
     //Récupérer un produit par son Id
     @ApiOperation(value = "Récupère un produit grâce à son ID à condition que celui-ci soit en stock!")
@@ -85,7 +80,4 @@ public class ProductController {
 
         return productDao.chercherUnProduitCher(prix);
     }
-
-
-
 }

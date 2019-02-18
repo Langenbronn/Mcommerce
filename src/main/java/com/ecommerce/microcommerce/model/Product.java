@@ -9,7 +9,7 @@ import javax.persistence.Id;
 import javax.validation.constraints.Min;
 
 @Entity
-//@JsonFilter("monFiltreDynamique")
+@JsonFilter("filtreDynamique")
 public class Product {
 
     @Id
