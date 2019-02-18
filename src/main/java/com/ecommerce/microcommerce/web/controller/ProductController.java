@@ -2,6 +2,7 @@ package com.ecommerce.microcommerce.web.controller;
 
 import com.ecommerce.microcommerce.dao.ProductDao;
 import com.ecommerce.microcommerce.model.Product;
+import com.ecommerce.microcommerce.web.exceptions.ProduitGratuitException;
 import com.ecommerce.microcommerce.web.exceptions.ProduitIntrouvableException;
 import com.fasterxml.jackson.databind.ser.FilterProvider;
 import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
@@ -16,7 +17,9 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import javax.validation.Valid;
 import java.net.URI;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 @Api( description="API pour es opérations CRUD sur les produits.")
@@ -39,6 +42,23 @@ public class ProductController {
         return produitsFiltres;
     }
 
+    @RequestMapping(value = "/ProduitsTrier", method = RequestMethod.GET)
+    public List<Product>  trierProduitsParOrdreAlphabetique() {
+        List<Product> produits = productDao.findAllByOrderByNom();
+        return produits;
+    }
+
+    @RequestMapping(value = "/AdminProduits", method = RequestMethod.GET)
+    public Map<Product, Integer> calculerMargeProduit () {
+           List <Product> produits = productDao.findAll();
+           Map<Product, Integer> listMargeProduit = new HashMap<>();
+           for(int i = 0; i < produits.size();i++){
+               Product produit = produits.get(i);
+               int marge = produit.getMarge();
+               listMargeProduit.put(produit,marge);
+           }
+        return listMargeProduit;
+    }
 
     //Récupérer un produit par son Id
     @ApiOperation(value = "Récupère un produit grâce à son ID à condition que celui-ci soit en stock!")
@@ -53,6 +73,7 @@ public class ProductController {
     @PostMapping(value = "/Produits")
     public ResponseEntity<Void> ajouterProduit(@Valid @RequestBody Product product) {
         Product productAdded =  productDao.save(product);
+        if(product.getPrix() == 0) throw new ProduitGratuitException("Le produit doit avoir un prix supérieur à zéro.");
         if (productAdded == null)
             return ResponseEntity.noContent().build();
         URI location = ServletUriComponentsBuilder
@@ -70,6 +91,7 @@ public class ProductController {
 
     @PutMapping (value = "/Produits")
     public void updateProduit(@RequestBody Product product) {
+        if(product.getPrix() == 0) throw new ProduitGratuitException("Le produit doit avoir un prix supérieur à zéro");
         productDao.save(product);
     }
 
